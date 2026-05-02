@@ -1,0 +1,12 @@
+// -------------- Enums ----------------
+enum PROVIDER_TYPE {
+  GOOGLE
+  BASIC
+}
+
+enum STATUS_TYPE {
+  PENDING // Added for queue visibility
+  SENT
+  REPLIED
+  FAILED
+}

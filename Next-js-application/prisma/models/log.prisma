@@ -1,0 +1,19 @@
+model Log {
+  id               Int         @id @default(autoincrement())
+  warmupConfigId   Int
+  senderEmailId    Int
+  recipientEmailId Int
+  scheduleTime     DateTime
+  timestamp        DateTime    @default(now())
+  status           STATUS_TYPE @default(PENDING)
+  errorMessage     String? // store failure reason or debug info
+
+  // Relationships
+  warmupConfig WarmupConfig @relation(fields: [warmupConfigId], references: [id], onDelete: Cascade)
+  sender       EmailConfig  @relation("SenderEmail", fields: [senderEmailId], references: [id], onDelete: Cascade)
+  recipient    EmailConfig  @relation("ReceiverEmail", fields: [recipientEmailId], references: [id], onDelete: Cascade)
+
+  @@index([warmupConfigId])
+  @@index([senderEmailId])
+  @@index([recipientEmailId])
+}

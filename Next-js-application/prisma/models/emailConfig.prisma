@@ -1,0 +1,17 @@
+model EmailConfig {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  email       String   @unique
+  appPassword String // encrypted or vault-managed
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  warmups      WarmupConfig[] @relation("WarmupEmail")
+  sentLogs     Log[]          @relation("SenderEmail")
+  receivedLogs Log[]          @relation("ReceiverEmail")
+
+  @@index([userId])
+}
