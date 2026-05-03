@@ -1,10 +1,12 @@
-import { SignJWT, jwtVerify } from 'jose'
-import { UserSessionPayload, UserThemePayload } from './definitions'
+import { JWTPayload, SignJWT, jwtVerify } from 'jose'
+import { UserThemePayload, UserSessionPayload } from '../types/interfaces';
 
 const secretKey = process.env.SESSION_SECRET
 const encodedKey = new TextEncoder().encode(secretKey)
 
-export async function encryptSession(payload: UserSessionPayload | UserThemePayload) {
+type AcceptedPayloadType = UserSessionPayload | UserThemePayload;
+
+export async function encryptSession(payload: AcceptedPayloadType): Promise<string> {
     return new SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
@@ -12,12 +14,12 @@ export async function encryptSession(payload: UserSessionPayload | UserThemePayl
         .sign(encodedKey)
 }
 
-export async function decryptSession(session: string | undefined = '') {
+export async function decryptSession(session: string | undefined = ''): Promise<JWTPayload | undefined> {
     try {
-        const { payload } = await jwtVerify(session, encodedKey, {
+        const { payload }: {payload: AcceptedPayloadType} = await jwtVerify(session, encodedKey, {
             algorithms: ['HS256'],
         })
-        return payload
+        return payload;
     } catch (error) {
         console.log('Failed to verify session')
     }

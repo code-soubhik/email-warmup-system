@@ -1,7 +1,9 @@
-// File: @/app/lib/definitions.ts
-
-import { Extends } from "@/generated/prisma/internal/prismaNamespace";
 import { JWTPayload } from "jose";
+
+export interface UserSessionInterface {
+    userId: string | null;
+    isAuth: boolean;
+}
 
 export interface Theme {
   theme: "dark" | "light";
