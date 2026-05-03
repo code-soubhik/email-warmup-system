@@ -1,8 +1,7 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
   provider = "prisma-client"
@@ -11,4 +10,89 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+   url     = env("DATABASE_URL")
+}
+
+// -------------- Enums ----------------
+enum PROVIDER_TYPE {
+  GOOGLE
+  BASIC
+}
+
+enum STATUS_TYPE {
+  PENDING // Added for queue visibility
+  SENT
+  REPLIED
+  FAILED
+}
+
+model User {
+  id            Int           @id @default(autoincrement())
+  email         String        @unique
+  password      String? // nullable for OAuth users
+  providerToken String? // e.g. Google ID or JWT
+  provider      PROVIDER_TYPE @default(BASIC)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relationships
+  emailConfigs EmailConfig[]
+  warmups      WarmupConfig[]
+}
+
+model Log {
+  id               Int         @id @default(autoincrement())
+  warmupConfigId   Int
+  senderEmailId    Int
+  recipientEmailId Int
+  scheduleTime     DateTime
+  timestamp        DateTime    @default(now())
+  status           STATUS_TYPE @default(PENDING)
+  errorMessage     String? // store failure reason or debug info
+
+  // Relationships
+  warmupConfig WarmupConfig @relation(fields: [warmupConfigId], references: [id], onDelete: Cascade)
+  sender       EmailConfig  @relation("SenderEmail", fields: [senderEmailId], references: [id], onDelete: Cascade)
+  recipient    EmailConfig  @relation("ReceiverEmail", fields: [recipientEmailId], references: [id], onDelete: Cascade)
+
+  @@index([warmupConfigId])
+  @@index([senderEmailId])
+  @@index([recipientEmailId])
+}
+
+model EmailConfig {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  email       String   @unique
+  appPassword String // encrypted or vault-managed
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  warmups      WarmupConfig[] @relation("WarmupEmail")
+  sentLogs     Log[]          @relation("SenderEmail")
+  receivedLogs Log[]          @relation("ReceiverEmail")
+
+  @@index([userId])
+}
+
+model WarmupConfig {
+  id                Int      @id @default(autoincrement())
+  userId            Int
+  warmupEmailId     Int // references EmailConfig (sender)
+  totalNoOfEmail    Int
+  intervalInMin     Int
+  recipientEmailIds Int[] // array of EmailConfig IDs
+  startTime         DateTime @default(now())
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+
+  // Relationships
+  warmupEmail EmailConfig @relation("WarmupEmail", fields: [warmupEmailId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs        Log[]
+
+  @@index([warmupEmailId])
 }

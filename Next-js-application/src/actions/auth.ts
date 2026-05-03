@@ -1,66 +1,99 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import { hash } from 'bcryptjs'
+import { compare, compareSync, hashSync } from 'bcryptjs'
 import { createSession } from '@/lib/authSession'
 import prisma from '@/lib/prisma'
+import { redis } from '@/lib/redis'
+import { getClientIp } from '../utils/serverUtils';
+import { sendEmail } from '@/lib/sendEMail'
 
-export async function login(formData: FormData) {
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function generateOtp(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+async function sendOtpEmail(email: string, otp: string) {
+  const html = `
+    <div style="font-family: sans-serif; text-align: center;">
+      <h2>Your OTP Code</h2>
+      <p>Use the following OTP to continue:</p>
+      <h1 style="letter-spacing: 4px;">${otp}</h1>
+      <p>This OTP will expire in 5 minutes.</p>
+    </div>
+  `;
+  await sendEmail({ to: email, subject: "EMAIL WARMUP | OTP Verification", html });
+}
+
+// ─── Send OTP (called on first "Create account" click) ────────────────────────
+export async function sendOtp({ email }: { email: string }) {
+  if (!email) return { error: 'Email is required.' };
+
+  const ip = await getClientIp();
+  const key = `otp:${email}:${ip}`;
+
+  const otp = generateOtp();
+  const hashOtp = hashSync(otp.toString(), 10);
+
+  await redis.set(key, hashOtp, { expiration: { type: 'EX', value: 5 * 60 * 1000 } });
+
+  await sendOtpEmail(email, otp);
+
+  return { success: true }
+}
+
+// ─── Login ────────────────────────────────────────────────────────────────────
+export async function login(prevState: { error: string }, formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
   if (!email || !password) {
-    throw new Error('Email and password are required')
+    return { error: 'Email and password are required.' }
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-  })
+  const user = await prisma.user.findUnique({ where: { email } })
 
   if (!user || !user.password) {
-    throw new Error('Invalid credentials')
+    return { error: 'Invalid credentials.' }
   }
 
-  // For simplicity, assuming password is hashed. In real app, use bcrypt.compare
-  // const isValid = await bcrypt.compare(password, user.password)
-  // if (!isValid) throw new Error('Invalid credentials')
-
-  // Since password is stored as plain text in schema, direct compare (not recommended)
-  if (password !== user.password) {
-    throw new Error('Invalid credentials')
+  const isValid = await compare(password, user.password)
+  if (!isValid) {
+    return { error: 'Invalid credentials.' }
   }
 
   await createSession(user.id.toString())
   redirect('/')
 }
 
+// ─── Signup (called on second "Verify & Create account" click) ────────────────
 export async function signup(formData: FormData) {
-  const name = formData.get('name') as string
   const email = formData.get('email') as string
   const password = formData.get('password') as string
-  const confirmPassword = formData.get('confirm-password') as string
+  const otp = formData.get('otp') as string
 
-  if (!name || !email || !password || !confirmPassword) {
-    throw new Error('All fields are required')
+  if (!email || !password || !otp) {
+    return { error: 'All fields are required.' }
   }
 
-  if (password !== confirmPassword) {
-    throw new Error('Passwords do not match')
+  // ── Verify OTP ──
+  const ip = await getClientIp();
+  const key = `otp:${email}:${ip}`;
+  const record = await redis.get(key);
+
+  if(!record){
+    return { error: 'No OTP found. Please request a new code.' }
+  }
+  
+  const isMatched = compareSync(otp.toString(), record);
+
+  if (!isMatched) {
+    return { error: 'Incorrect code. Please try again.' }
   }
 
-  if (password.length < 8) {
-    throw new Error('Password must be at least 8 characters')
-  }
-
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  })
-
-  if (existingUser) {
-    throw new Error('User already exists')
-  }
-
-  const hashedPassword = await hash(password, 12)
+  // // ── Create user ──
+  const hashedPassword = hashSync(password, 12);
 
   const user = await prisma.user.create({
     data: {
