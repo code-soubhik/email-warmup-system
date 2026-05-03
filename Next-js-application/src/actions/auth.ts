@@ -34,7 +34,7 @@ export async function sendOtp({ email }: { email: string }) {
   const key = `otp:${email}:${ip}`;
 
   const otp = generateOtp();
-  const hashOtp = hashSync(otp.toString(), 10);
+  const hashOtp = hashSync(otp.toString());
 
   await redis.set(key, hashOtp, { expiration: { type: 'EX', value: 5 * 60 * 1000 } });
 
@@ -93,7 +93,7 @@ export async function signup(formData: FormData) {
   }
 
   // // ── Create user ──
-  const hashedPassword = hashSync(password, 12);
+  const hashedPassword = hashSync(password);
 
   const user = await prisma.user.create({
     data: {
