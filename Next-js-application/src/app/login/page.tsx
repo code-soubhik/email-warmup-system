@@ -9,31 +9,103 @@ export default function LoginPage() {
   const [state, formAction] = useActionState(login, { error: "" });
 
   return (
-    <div className="flex h-full items-center justify-center">
-      <div className="w-full max-w-md p-8 border rounded-xl shadow space-y-6">
+    <div className="flex min-h-screen items-center justify-center bg-[#080a0f]">
 
-        <h1 className="text-2xl font-semibold text-center">Login</h1>
+      {/* left decorative panel — hidden on mobile */}
+      <div className="hidden lg:flex lg:w-1/2 h-full flex-col justify-between p-14 border-r border-white/[0.07] relative overflow-hidden">
+        {/* grid */}
+        <div className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px)",
+            backgroundSize: "48px 48px",
+          }} />
+        {/* glow */}
+        <div className="pointer-events-none absolute -left-40 top-1/3 w-[500px] h-[500px] rounded-full bg-amber-500/[0.07] blur-[120px]" />
 
-        <form action={formAction} className="space-y-4">
-          <Input name="email" placeholder="Email" type="email" required />
-          <Input name="password" placeholder="Password" type="password" required />
+        {/* wordmark */}
+        <p className="relative z-10 text-xl font-serif text-[#e8e6e1]">
+          MailWarm<span className="text-amber-400">.</span>
+        </p>
 
-          <div className="flex justify-end text-sm">
-            {/* <a href="/forgot-password" className="hover:underline">Forgot password?</a> */}
+        {/* quote */}
+        <div className="relative z-10 space-y-5">
+          <p className="text-3xl font-serif text-[#e8e6e1]/90 leading-snug max-w-xs">
+            "Your emails deserve to land in the{" "}
+            <em className="italic text-amber-400">inbox.</em>"
+          </p>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-amber-400/20 ring-1 ring-amber-400/30" />
+            <div>
+              <p className="text-sm text-[#e8e6e1]/70 font-medium">Sarah Chen</p>
+              <p className="text-xs text-white/30 font-mono tracking-wide">CTO, Momentum Labs</p>
+            </div>
+          </div>
+        </div>
+
+        <p className="relative z-10 text-[10px] tracking-[0.2em] uppercase text-white/20 font-mono">
+          Secure · Private · Automatic
+        </p>
+      </div>
+
+      {/* right form panel */}
+      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 h-full">
+
+        {/* mobile wordmark */}
+        <p className="lg:hidden text-xl font-serif text-[#e8e6e1] mb-10">
+          MailWarm<span className="text-amber-400">.</span>
+        </p>
+
+        <div className="w-full max-w-sm space-y-8">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-serif text-[#e8e6e1] tracking-tight">Welcome back</h1>
+            <p className="text-xs font-mono tracking-widest uppercase text-white/30">Sign in to continue</p>
           </div>
 
-          {state.error && (
-            <p className="text-sm text-destructive text-center">{state.error}</p>
-          )}
+          <form action={formAction} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-mono tracking-widest uppercase text-white/40">Email</label>
+              <Input
+                name="email"
+                placeholder="you@example.com"
+                type="email"
+                required
+                className="h-11 bg-white/[0.04] border-white/10 text-[#e8e6e1] placeholder:text-white/20 focus-visible:border-amber-400 focus-visible:ring-0 rounded-md"
+              />
+            </div>
 
-          <Button className="w-full" type="submit">Login</Button>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-mono tracking-widest uppercase text-white/40">Password</label>
+                {/* <a href="/forgot-password" className="text-[10px] font-mono text-amber-400/60 hover:text-amber-400 transition-colors">Forgot?</a> */}
+              </div>
+              <Input
+                name="password"
+                placeholder="••••••••"
+                type="password"
+                required
+                className="h-11 bg-white/[0.04] border-white/10 text-[#e8e6e1] placeholder:text-white/20 focus-visible:border-amber-400 focus-visible:ring-0 rounded-md"
+              />
+            </div>
 
-          <p className="text-sm text-center text-muted-foreground">
-            Don't have an account?{" "}
-            <a href="/signup" className="underline">Sign up</a>
-          </p>
-        </form>
+            {state.error && (
+              <p className="text-sm text-destructive text-center">{state.error}</p>
+            )}
 
+            <Button
+              type="submit"
+              className="w-full h-11 bg-amber-400 text-[#080a0f] hover:bg-amber-300 font-mono text-[11px] tracking-widest uppercase rounded-md transition-all"
+            >
+              Sign in
+            </Button>
+
+            <p className="text-sm text-center text-white/30 font-mono">
+              No account?{" "}
+              <a href="/signup" className="text-amber-400/70 hover:text-amber-400 transition-colors underline-offset-4 underline">
+                Sign up
+              </a>
+            </p>
+          </form>
+        </div>
       </div>
     </div>
   );

@@ -39,9 +39,7 @@ export default async function RootLayout({
         <SessionProvider defaultValue={session}>
           <ThemeProvider>
             <TanstackProvider>
-              <div className="min-h-screen min-w-full">
-                {children}
-              </div>
+              {children}
             </TanstackProvider>
           </ThemeProvider>
         </SessionProvider>

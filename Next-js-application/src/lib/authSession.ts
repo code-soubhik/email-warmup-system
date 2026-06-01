@@ -1,6 +1,6 @@
 import 'server-only'
 import { cookies } from 'next/headers'
-import { SESSION_COOKIE_NAME } from '@/constant'
+import { SESSION_COOKIE_NAME } from '@/utils/constant'
 import { decryptSession, encryptSession } from './encryptDecrypt'
 import { cache } from 'react'
 import { UserSessionInterface, UserSessionPayload } from '@/types/interfaces'

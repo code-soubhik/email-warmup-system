@@ -1,91 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import WarmupChart from "@/components/WarmupChart";
+import Label from "@/components/Label";
+import { useSessionAuth } from "@/providers/SessionProvider";
 
-// ── Fonts: add to layout.tsx ──────────────────────────────────
-// import { Instrument_Serif, DM_Mono } from "next/font/google"
-// const serif = Instrument_Serif({ variable: "--font-serif", subsets: ["latin"], weight: "400", style: ["normal","italic"] })
-// const mono  = DM_Mono({ variable: "--font-mono", subsets: ["latin"], weight: ["300","400","500"] })
-// tailwind.config: fontFamily: { serif: ["var(--font-serif)"], mono: ["var(--font-mono)"] }
-// ─────────────────────────────────────────────────────────────
 
-// ── Animated warmup chart ─────────────────────────────────────
-const RAMP = [
-  { day: "Day 1",  pct: 12,  count: 5  },
-  { day: "Day 3",  pct: 20,  count: 8  },
-  { day: "Day 7",  pct: 35,  count: 14 },
-  { day: "Day 14", pct: 55,  count: 22 },
-  { day: "Day 21", pct: 75,  count: 30 },
-  { day: "Day 30", pct: 100, count: 40 },
-];
-
-function WarmupChart() {
-  const [animated, setAnimated] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setAnimated(true); },
-      { threshold: 0.4 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref}>
-      <Card className="bg-[#0e1117] border-white/[0.07] overflow-hidden mt-12">
-        {/* terminal header */}
-        <div className="flex items-center gap-2 px-5 py-3 border-b border-white/[0.07] bg-white/[0.02]">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
-          <span className="ml-2 text-[10px] tracking-widest uppercase text-white/30 font-mono">
-            warmup_ramp — emails per day
-          </span>
-        </div>
-        <CardContent className="p-6 md:p-8 space-y-3.5">
-          {RAMP.map((r, i) => (
-            <div key={r.day} className="flex items-center gap-4">
-              <span className="w-12 text-right text-[10px] text-white/30 font-mono flex-shrink-0">
-                {r.day}
-              </span>
-              <div className="flex-1 h-2 bg-white/[0.04] rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-300 transition-all duration-700"
-                  style={{
-                    width: animated ? `${r.pct}%` : "0%",
-                    transitionDelay: `${i * 100}ms`,
-                  }}
-                />
-              </div>
-              <span className="w-6 text-[10px] text-amber-400 font-mono flex-shrink-0">
-                {r.count}
-              </span>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-// ── Section label ──────────────────────────────────────────────
-function Label({ children }: { children: string }) {
-  return (
-    <p className="text-[10px] tracking-[0.18em] uppercase text-amber-400 mb-4 font-mono">
-      {children}
-    </p>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
 export default function LandingPage() {
+
+  // const { isAuth } = useSessionAuth().session;
+
   return (
     <div className="bg-[#080a0f] text-[#e8e6e1] min-h-screen overflow-x-hidden">
 
@@ -94,42 +22,35 @@ export default function LandingPage() {
         <a href="/" className="text-xl tracking-tight text-[#e8e6e1] no-underline font-serif">
           MailWarm<span className="text-amber-400">.</span>
         </a>
-        <ul className="hidden md:flex items-center gap-8 list-none">
-          {[["#how", "How it works"], ["#features", "Features"], ["#pricing", "Pricing"]].map(([href, label]) => (
-            <li key={href}>
-              <a href={href} className="text-[11px] tracking-widest uppercase text-white/40 hover:text-white/80 transition-colors no-underline font-mono">
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
-        <Button asChild size="sm" className="bg-amber-400 text-[#080a0f] hover:bg-amber-300 font-mono text-[11px] tracking-widest uppercase rounded-sm">
-          <Link href="/signup">Start free</Link>
-        </Button>
+
+        {/* ── no nav links — dashboard/config are post-login ── */}
+
+        <div className="flex items-center gap-3">
+          <Button asChild variant="ghost" size="sm" className="text-white/40 hover:text-white font-mono text-[11px] tracking-widest uppercase">
+            <Link href="/login">Login</Link>
+          </Button>
+          <Button asChild size="sm" className="bg-amber-400 text-[#080a0f] hover:bg-amber-300 font-mono text-[11px] tracking-widest uppercase rounded-sm">
+            <Link href="/signup">Start free</Link>
+          </Button>
+        </div>
       </nav>
 
       {/* ══ HERO ═════════════════════════════════════════════ */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-20 overflow-hidden">
-
-        {/* grid bg */}
         <div className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage: "linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px)",
             backgroundSize: "48px 48px",
             maskImage: "radial-gradient(ellipse 80% 60% at 50% 0%,black 30%,transparent 80%)",
           }} />
-
-        {/* amber glow */}
         <div className="pointer-events-none absolute top-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-amber-500/[0.06] blur-[100px]" />
 
-        {/* badge */}
         <Badge variant="outline"
           className="mb-10 gap-2 px-4 py-1.5 rounded-full border-amber-400/30 bg-amber-400/10 text-amber-400 font-mono text-[10px] tracking-[0.12em] uppercase">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
           Gmail OAuth2 — No SMTP required
         </Badge>
 
-        {/* headline */}
         <h1 className="text-5xl md:text-7xl lg:text-[96px] leading-none tracking-[-0.03em] text-[#e8e6e1] max-w-4xl mb-5 font-serif">
           Your emails deserve<br />
           to land in the{" "}
@@ -149,14 +70,13 @@ export default function LandingPage() {
           </Button>
         </div>
 
-        {/* stat bar */}
         <Card className="mt-16 border-white/[0.07] bg-[#0e1117]/60 backdrop-blur">
           <CardContent className="flex items-center gap-8 md:gap-10 px-8 md:px-10 py-6 flex-wrap justify-center">
             {[
               { num: "98", suffix: "%", label: "Inbox rate" },
               { num: "14", suffix: "d", label: "Avg. warmup time" },
-              { num: "0",  suffix: "",  label: "SMTP config" },
-              { num: "∞",  suffix: "",  label: "Threads simulated" },
+              { num: "0", suffix: "", label: "SMTP config" },
+              { num: "∞", suffix: "", label: "Threads simulated" },
             ].map((s, i) => (
               <div key={s.label} className="flex items-center gap-8 md:gap-10">
                 {i > 0 && <Separator orientation="vertical" className="hidden md:block h-10 bg-white/[0.07]" />}
@@ -184,9 +104,9 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/[0.07] border border-white/[0.07] rounded-xl overflow-hidden">
           {[
-            { num: "01", icon: "🔗", title: "Connect Gmail",     body: "Authorize via Google OAuth2. No passwords stored — ever. Tokens AES-256 encrypted at rest." },
-            { num: "02", icon: "⚙️", title: "Configure warmup",  body: "Set your email target, send interval, and reply window. Ramp-up is handled automatically." },
-            { num: "03", icon: "📈", title: "Watch it grow",     body: "Live dashboard shows every email, reply, and thread. Health score updates in real time." },
+            { num: "01", icon: "🔗", title: "Connect Gmail", body: "Authorize via Google OAuth2. No passwords stored — ever. Tokens AES-256 encrypted at rest." },
+            { num: "02", icon: "⚙️", title: "Configure warmup", body: "Set your email target, send interval, and reply window. Ramp-up is handled automatically." },
+            { num: "03", icon: "📈", title: "Watch it grow", body: "Live dashboard shows every email, reply, and thread. Health score updates in real time." },
           ].map((s) => (
             <div key={s.num} className="p-8 md:p-10 bg-[#0e1117] hover:bg-[#111620] transition-colors">
               <p className="text-[10px] tracking-widest uppercase text-amber-400/60 font-mono mb-5">{s.num}</p>
@@ -209,12 +129,12 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px border border-white/[0.07] rounded-xl overflow-hidden bg-white/[0.07]">
           {[
-            { icon: "🧠", title: "Human-like replies",    body: "Varied templates, randomised send times and reply delays. Indistinguishable from real conversations." },
-            { icon: "⏱️", title: "Chained scheduling",    body: "Each sent email spawns the next with a random delay — no cron jobs, no missed windows, no bulk bursts." },
-            { icon: "🔐", title: "OAuth2 only",           body: "Gmail connected via Google OAuth2. Access tokens auto-refresh. Zero SMTP credentials stored." },
-            { icon: "📡", title: "Live dashboard",        body: "WebSocket-powered real-time feed. Watch emails send and replies arrive as they happen." },
+            { icon: "🧠", title: "Human-like replies", body: "Varied templates, randomised send times and reply delays. Indistinguishable from real conversations." },
+            { icon: "⏱️", title: "Chained scheduling", body: "Each sent email spawns the next with a random delay — no cron jobs, no missed windows, no bulk bursts." },
+            { icon: "🔐", title: "OAuth2 only", body: "Gmail connected via Google OAuth2. Access tokens auto-refresh. Zero SMTP credentials stored." },
+            { icon: "📡", title: "Live dashboard", body: "WebSocket-powered real-time feed. Watch emails send and replies arrive as they happen." },
             { icon: "🧵", title: "Thread depth tracking", body: "Replies stay in-thread with proper headers. Depth tracked per conversation for authentic signals." },
-            { icon: "🛡️", title: "Anti-spam by design",  body: "Send windows, volume caps, reply probability, and jitter baked in. Designed to look completely natural." },
+            { icon: "🛡️", title: "Anti-spam by design", body: "Send windows, volume caps, reply probability, and jitter baked in. Designed to look completely natural." },
           ].map((f) => (
             <div key={f.title} className="p-8 bg-[#0e1117] hover:bg-[#111620] transition-colors">
               <div className="w-10 h-10 rounded-lg bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-lg mb-5">
@@ -254,11 +174,10 @@ export default function LandingPage() {
             },
           ].map((p) => (
             <Card key={p.tier}
-              className={`relative border rounded-xl transition-colors ${
-                p.featured
+              className={`relative border rounded-xl transition-colors ${p.featured
                   ? "border-amber-400/40 bg-gradient-to-b from-[#111620] to-[#0e1117]"
                   : "border-white/[0.07] bg-[#0e1117] hover:border-white/[0.14]"
-              }`}>
+                }`}>
               {p.featured && (
                 <div className="absolute -top-px left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-400 text-[#080a0f] text-[9px] tracking-widest uppercase font-bold rounded-b-lg font-mono">
                   Most popular
@@ -280,11 +199,10 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <Button asChild
-                  className={`w-full font-mono text-[10px] tracking-widest uppercase rounded-sm h-10 ${
-                    p.featured
+                  className={`w-full font-mono text-[10px] tracking-widest uppercase rounded-sm h-10 ${p.featured
                       ? "bg-amber-400 text-[#080a0f] hover:bg-amber-300"
                       : "bg-transparent border border-white/[0.07] text-white/40 hover:text-white/70 hover:border-white/20"
-                  }`}
+                    }`}
                   variant={p.featured ? "default" : "outline"}>
                   <Link href="/signup">{p.cta}</Link>
                 </Button>
@@ -320,15 +238,6 @@ export default function LandingPage() {
         <a href="/" className="text-base text-white/40 no-underline font-serif">
           MailWarm<span className="text-amber-400">.</span>
         </a>
-        <ul className="flex gap-6 list-none flex-wrap">
-          {[["#how", "How it works"], ["#features", "Features"], ["#pricing", "Pricing"], ["/login", "Login"]].map(([href, label]) => (
-            <li key={href}>
-              <a href={href} className="text-[10px] tracking-widest uppercase text-white/30 hover:text-white/60 transition-colors no-underline font-mono">
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
         <span className="text-[10px] tracking-widest text-white/20 font-mono">© 2025 MailWarm. All rights reserved.</span>
       </footer>
 

@@ -2,7 +2,6 @@ import { JWTPayload } from "jose";
 
 export interface UserSessionInterface {
     userId: string | null;
-    isAuth: boolean;
 }
 
 export interface Theme {
