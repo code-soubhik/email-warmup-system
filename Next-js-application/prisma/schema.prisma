@@ -10,13 +10,17 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-   url     = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 // -------------- Enums ----------------
 enum PROVIDER_TYPE {
   GOOGLE
   BASIC
+}
+
+enum EMAIL_PROVIDER {
+  GMAIL
 }
 
 enum STATUS_TYPE {
@@ -61,37 +65,70 @@ model Log {
 }
 
 model EmailConfig {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  email       String   @unique
-  appPassword String // encrypted or vault-managed
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id       Int            @id @default(autoincrement())
+  userId   Int
+  email    String
+  provider EMAIL_PROVIDER @default(GMAIL)
+
+  // OAuth tokens (encrypted before storing)
+  accessToken  String
+  refreshToken String
+  expiryDate   DateTime
+
+  // status handling
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relationships
-  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  warmups      WarmupConfig[] @relation("WarmupEmail")
-  sentLogs     Log[]          @relation("SenderEmail")
-  receivedLogs Log[]          @relation("ReceiverEmail")
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  warmups          WarmupConfig[]    @relation("WarmupEmail")
+  sentLogs         Log[]             @relation("SenderEmail")
+  receivedLogs     Log[]             @relation("ReceiverEmail")
+  warmupRecipients WarmupRecipient[]
 
+  // Prevent duplicate same email for SAME user
+  @@unique([userId, email])
+  // Indexes
   @@index([userId])
+  @@index([email])
+}
+
+model WarmupRecipient {
+  id             Int @id @default(autoincrement())
+  warmupConfigId Int
+  emailConfigId  Int
+
+  // Relationships
+  warmupConfig WarmupConfig @relation(fields: [warmupConfigId], references: [id], onDelete: Cascade)
+  emailConfig  EmailConfig  @relation(fields: [emailConfigId], references: [id], onDelete: Cascade)
+
+  @@index([warmupConfigId])
+  @@index([emailConfigId])
 }
 
 model WarmupConfig {
-  id                Int      @id @default(autoincrement())
-  userId            Int
-  warmupEmailId     Int // references EmailConfig (sender)
-  totalNoOfEmail    Int
-  intervalInMin     Int
-  recipientEmailIds Int[] // array of EmailConfig IDs
-  startTime         DateTime @default(now())
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
+  id            Int @id @default(autoincrement())
+  userId        Int
+  warmupEmailId Int
+
+  totalNoOfEmail Int
+
+  minDelaySec Int
+  maxDelaySec Int
+
+  replyProbability Float
+
+  startTime DateTime
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
 
   // Relationships
-  warmupEmail EmailConfig @relation("WarmupEmail", fields: [warmupEmailId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  warmupEmail EmailConfig       @relation("WarmupEmail", fields: [warmupEmailId], references: [id], onDelete: Cascade)
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipients  WarmupRecipient[]
   logs        Log[]
 
   @@index([warmupEmailId])
