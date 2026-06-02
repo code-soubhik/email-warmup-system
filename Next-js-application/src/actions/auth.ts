@@ -1,12 +1,19 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import { compare, compareSync, hashSync } from 'bcryptjs'
-import { createSession } from '@/lib/authSession'
+import argon2 from "argon2"
 import prisma from '@/lib/prisma'
+
+import { createSession, deleteSession } from '@/lib/authSession'
 import { redis } from '@/lib/redis'
 import { getClientIp } from '../utils/serverUtils';
 import { sendEmail } from '@/lib/sendEMail'
+
+if (!process.env.PEPPER) {
+  throw new Error("Missing PEPPER env variable");
+}
+
+const PEPPER = process.env.PEPPER;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -23,86 +30,140 @@ async function sendOtpEmail(email: string, otp: string) {
       <p>This OTP will expire in 5 minutes.</p>
     </div>
   `;
-  await sendEmail({ to: email, subject: "EMAIL WARMUP | OTP Verification", html });
+
+  await sendEmail({
+    to: email,
+    subject: "EMAIL WARMUP | OTP Verification",
+    html
+  });
 }
 
-// ─── Send OTP (called on first "Create account" click) ────────────────────────
-export async function sendOtp({ email }: { email: string }) {
-  if (!email) return { error: 'Email is required.' };
+// ─── Send OTP ────────────────────────────────────────────────────────────────
 
-  const ip = await getClientIp();
-  const key = `otp:${email}:${ip}`;
+export async function sendOtpAction({ email }: { email: string }) {
+  try {
+    if (!email) return { error: 'Email is required.' };
 
-  const otp = generateOtp();
-  const hashOtp = hashSync(otp.toString());
+    const ip = await getClientIp();
+    const key = `otp:${email}:${ip}`;
 
-  await redis.set(key, hashOtp, { expiration: { type: 'EX', value: 5 * 60 * 1000 } });
+    const otp = generateOtp();
 
-  await sendOtpEmail(email, otp);
+    const hashOtp = await argon2.hash(otp + PEPPER);
 
-  return { success: true }
+    await redis.set(key, hashOtp, {
+      expiration: { type: 'EX', value: 5 * 60 } // seconds
+    });
+
+    await sendOtpEmail(email, otp);
+
+    return { success: true };
+  } catch (err) {
+    console.log("OTP ACTION: ", err);
+    return { error: 'Something went wrong' };
+  }
 }
 
 // ─── Login ────────────────────────────────────────────────────────────────────
-export async function login(prevState: { error: string }, formData: FormData) {
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
 
-  if (!email || !password) {
-    return { error: 'Email and password are required.' }
+export async function loginAction(prevState: { error: string }, formData: FormData) {
+  try {
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    if (!email || !password) {
+      return { error: 'Email and password are required.' };
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user || !user.password) {
+      return { error: 'Invalid credentials.' };
+    }
+
+    const isValid = await argon2.verify(
+      user.password,
+      password + PEPPER
+    );
+
+    if (!isValid) {
+      return { error: 'Invalid credentials.' };
+    }
+
+    await createSession(user.id.toString());
+
+    redirect('/');
+  } catch (err) {
+    throw err; // IMPORTANT: lets Next.js handle redirect cleanly
   }
-
-  const user = await prisma.user.findUnique({ where: { email } })
-
-  if (!user || !user.password) {
-    return { error: 'Invalid credentials.' }
-  }
-
-  const isValid = await compare(password, user.password)
-  if (!isValid) {
-    return { error: 'Invalid credentials.' }
-  }
-
-  await createSession(user.id.toString())
-  redirect('/')
 }
 
-// ─── Signup (called on second "Verify & Create account" click) ────────────────
-export async function signup(formData: FormData) {
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const otp = formData.get('otp') as string
+// ─── Signup ───────────────────────────────────────────────────────────────────
 
-  if (!email || !password || !otp) {
-    return { error: 'All fields are required.' }
+export async function signupAction(formData: FormData) {
+  try {
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const otp = formData.get('otp') as string;
+
+    if (!email || !password || !otp) {
+      return { error: 'All fields are required.' };
+    }
+
+    const ip = await getClientIp();
+    const key = `otp:${email}:${ip}`;
+
+    const record = await redis.get(key);
+
+    if (!record || typeof record !== "string") {
+      return { error: 'No OTP found. Please request a new code.' };
+    }
+
+    const isMatched = await argon2.verify(
+      record,
+      otp + PEPPER
+    );
+
+    if (!isMatched) {
+      return { error: 'Incorrect code. Please try again.' };
+    }
+
+    await redis.del(key); // prevent OTP reuse
+
+    const userExists = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (userExists) {
+      return { error: 'Email already exists' };
+    }
+
+    const hashedPassword = await argon2.hash(
+      password + PEPPER,
+      { type: argon2.argon2id }
+    );
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        provider: 'BASIC',
+      },
+    });
+
+    await createSession(user.id.toString());
+
+    redirect('/');
+  } catch (err) {
+    throw err; // IMPORTANT: prevents NEXT_REDIRECT logging issue
   }
+}
 
-  // ── Verify OTP ──
-  const ip = await getClientIp();
-  const key = `otp:${email}:${ip}`;
-  const record = await redis.get(key);
-
-  if(!record){
-    return { error: 'No OTP found. Please request a new code.' }
+export async function logoutAction() {
+  try {
+    await deleteSession();
+    redirect('/login');
+  } catch (err) {
+    throw err; // IMPORTANT: prevents NEXT_REDIRECT logging issue
   }
-  
-  const isMatched = compareSync(otp.toString(), record);
-
-  if (!isMatched) {
-    return { error: 'Incorrect code. Please try again.' }
-  }
-
-  // // ── Create user ──
-  const hashedPassword = hashSync(password);
-
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      provider: 'BASIC',
-    },
-  })
-
-  await createSession(user.id.toString())
-  redirect('/')
 }

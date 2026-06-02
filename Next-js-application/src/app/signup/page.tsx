@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { sendOtp, signup } from "@/actions/auth";
+import { sendOtpAction, signupAction } from "@/actions/auth";
 
 export default function SignupPage() {
   const [otpSent, setOtpSent] = useState(false);
@@ -19,7 +19,7 @@ export default function SignupPage() {
     const passwd = formData.get("password") as string;
     const confirmPasswd = formData.get("confirm") as string;
     if (passwd !== confirmPasswd) { setError("Passwords do not match."); return; }
-    const result = await sendOtp({ email: formData.get("email") as string });
+    const result = await sendOtpAction({ email: formData.get("email") as string });
     if (result?.error) { setError(result.error); return; }
     setEmail(formData.get("email") as string);
     setPassword(passwd);
@@ -31,7 +31,7 @@ export default function SignupPage() {
     setError("");
     const otp = formData.get("otp") as string;
     if (!otp || otp.length !== 6) { setError("Enter the 6-digit code."); return; }
-    const result = await signup(formData);
+    const result = await signupAction(formData);
     if (result?.error) { setError(result.error); return; }
   }
 
@@ -40,7 +40,7 @@ export default function SignupPage() {
     setResending(true);
     setResent(false);
     setError("");
-    const result = await sendOtp({ email });
+    const result = await sendOtpAction({ email });
     setResending(false);
     if (result?.error) { setError(result.error); return; }
     setResent(true);
@@ -60,7 +60,7 @@ export default function SignupPage() {
         <div className="pointer-events-none absolute -right-40 bottom-1/3 w-[500px] h-[500px] rounded-full bg-amber-500/[0.07] blur-[120px]" />
 
         <p className="relative z-10 text-xl font-serif text-[#e8e6e1]">
-          MailWarm<span className="text-amber-400">.</span>
+          EmailWarmup
         </p>
 
         <div className="relative z-10 space-y-5">
@@ -77,7 +77,7 @@ export default function SignupPage() {
           </ul>
         </div>
 
-        <p className="relative z-10 text-[10px] tracking-[0.2em] uppercase text-white/20 font-mono">
+        <p className="relative mt-4 z-10 text-[10px] tracking-[0.2em] uppercase text-white/20 font-mono">
           Secure · Private · Automatic
         </p>
       </div>
@@ -87,7 +87,7 @@ export default function SignupPage() {
 
         {/* mobile wordmark */}
         <p className="lg:hidden text-xl font-serif text-[#e8e6e1] mb-10">
-          MailWarm<span className="text-amber-400">.</span>
+          EmailWarmup
         </p>
 
         <div className="w-full max-w-sm space-y-8">
@@ -108,7 +108,7 @@ export default function SignupPage() {
                     placeholder="you@example.com"
                     type="email"
                     required
-                    className="h-11 bg-white/[0.04] border-white/10 text-[#e8e6e1] placeholder:text-white/20 focus-visible:border-amber-400 focus-visible:ring-0 rounded-md"
+                    className="h-11 bg-white/4 border-white/10 text-[#e8e6e1] placeholder:text-white/20 focus-visible:border-amber-400 focus-visible:ring-0 rounded-md"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -120,7 +120,7 @@ export default function SignupPage() {
                     required
                     pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                     title="Min 8 chars, one uppercase, one number"
-                    className="h-11 bg-white/[0.04] border-white/10 text-[#e8e6e1] placeholder:text-white/20 focus-visible:border-amber-400 focus-visible:ring-0 rounded-md"
+                    className="h-11 bg-white/4 border-white/10 text-[#e8e6e1] placeholder:text-white/20 focus-visible:border-amber-400 focus-visible:ring-0 rounded-md"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -130,7 +130,7 @@ export default function SignupPage() {
                     placeholder="••••••••"
                     type="password"
                     required
-                    className="h-11 bg-white/[0.04] border-white/10 text-[#e8e6e1] placeholder:text-white/20 focus-visible:border-amber-400 focus-visible:ring-0 rounded-md"
+                    className="h-11 bg-white/4 border-white/10 text-[#e8e6e1] placeholder:text-white/20 focus-visible:border-amber-400 focus-visible:ring-0 rounded-md"
                   />
                 </div>
 
@@ -151,7 +151,7 @@ export default function SignupPage() {
               <div className="space-y-1">
                 <h1 className="text-2xl font-serif text-[#e8e6e1] tracking-tight">Verify your email</h1>
                 <p className="text-xs font-mono tracking-widest uppercase text-white/30">
-                  Code sent to <span className="text-amber-400/70">{email}</span>
+                  Code sent to <span className="text-amber-400/70 lowercase">{email}</span>
                 </p>
               </div>
 
@@ -172,7 +172,7 @@ export default function SignupPage() {
                     required
                     autoFocus
                     autoComplete="one-time-code"
-                    className="h-11 bg-white/[0.04] border-white/10 text-[#e8e6e1] placeholder:text-white/20 focus-visible:border-amber-400 focus-visible:ring-0 rounded-md text-center tracking-[0.5em] text-lg"
+                    className="h-11 bg-white/4 border-white/10 text-[#e8e6e1] placeholder:text-white/20 focus-visible:border-amber-400 focus-visible:ring-0 rounded-md text-center tracking-[0.5em] text-lg"
                   />
                 </div>
 

@@ -17,7 +17,7 @@ export const SessionProvider = ({
   children: ReactNode
   defaultValue: UserSessionInterface
 }) => {
-  const [session, setSession] = useState(defaultValue)
+  const [session, setSession] = useState<UserSessionInterface>(defaultValue)
 
   return (
     <SessionContext.Provider value={{ session, setSession }}>

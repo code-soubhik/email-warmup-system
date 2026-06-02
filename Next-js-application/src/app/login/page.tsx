@@ -1,12 +1,12 @@
 "use client";
 
+import { loginAction } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { login } from "@/actions/auth";
 import { useActionState } from "react";
 
 export default function LoginPage() {
-  const [state, formAction] = useActionState(login, { error: "" });
+  const [state, formAction] = useActionState(loginAction, { error: "" });
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#080a0f]">
@@ -24,7 +24,7 @@ export default function LoginPage() {
 
         {/* wordmark */}
         <p className="relative z-10 text-xl font-serif text-[#e8e6e1]">
-          MailWarm<span className="text-amber-400">.</span>
+          EmailWarmup
         </p>
 
         {/* quote */}
@@ -33,13 +33,6 @@ export default function LoginPage() {
             "Your emails deserve to land in the{" "}
             <em className="italic text-amber-400">inbox.</em>"
           </p>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-amber-400/20 ring-1 ring-amber-400/30" />
-            <div>
-              <p className="text-sm text-[#e8e6e1]/70 font-medium">Sarah Chen</p>
-              <p className="text-xs text-white/30 font-mono tracking-wide">CTO, Momentum Labs</p>
-            </div>
-          </div>
         </div>
 
         <p className="relative z-10 text-[10px] tracking-[0.2em] uppercase text-white/20 font-mono">
@@ -58,7 +51,7 @@ export default function LoginPage() {
         <div className="w-full max-w-sm space-y-8">
           <div className="space-y-1">
             <h1 className="text-2xl font-serif text-[#e8e6e1] tracking-tight">Welcome back</h1>
-            <p className="text-xs font-mono tracking-widest uppercase text-white/30">Sign in to continue</p>
+            <p className="text-xs font-mono tracking-widest uppercase text-white/30">Login to continue</p>
           </div>
 
           <form action={formAction} className="space-y-4">
@@ -95,7 +88,7 @@ export default function LoginPage() {
               type="submit"
               className="w-full h-11 bg-amber-400 text-[#080a0f] hover:bg-amber-300 font-mono text-[11px] tracking-widest uppercase rounded-md transition-all"
             >
-              Sign in
+              Login
             </Button>
 
             <p className="text-sm text-center text-white/30 font-mono">

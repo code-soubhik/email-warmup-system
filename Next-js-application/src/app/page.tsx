@@ -8,11 +8,11 @@ import { Separator } from "@/components/ui/separator";
 import WarmupChart from "@/components/WarmupChart";
 import Label from "@/components/Label";
 import { useSessionAuth } from "@/providers/SessionProvider";
-
+import { logoutAction } from "@/actions/auth";
 
 export default function LandingPage() {
-
-  // const { isAuth } = useSessionAuth().session;
+  const { session } = useSessionAuth();
+  const isAuth = session.userId !== null;
 
   return (
     <div className="bg-[#080a0f] text-[#e8e6e1] min-h-screen overflow-x-hidden">
@@ -20,18 +20,33 @@ export default function LandingPage() {
       {/* ══ NAV ══════════════════════════════════════════════ */}
       <nav className="fixed top-0 inset-x-0 z-50 h-16 flex items-center justify-between px-6 md:px-12 border-b border-white/[0.07] bg-[#080a0f]/80 backdrop-blur-xl">
         <a href="/" className="text-xl tracking-tight text-[#e8e6e1] no-underline font-serif">
-          MailWarm<span className="text-amber-400">.</span>
+          EmailWarmup
         </a>
 
-        {/* ── no nav links — dashboard/config are post-login ── */}
-
         <div className="flex items-center gap-3">
-          <Button asChild variant="ghost" size="sm" className="text-white/40 hover:text-white font-mono text-[11px] tracking-widest uppercase">
-            <Link href="/login">Login</Link>
-          </Button>
-          <Button asChild size="sm" className="bg-amber-400 text-[#080a0f] hover:bg-amber-300 font-mono text-[11px] tracking-widest uppercase rounded-sm">
-            <Link href="/signup">Start free</Link>
-          </Button>
+          {isAuth ? (
+            <>
+              <Button asChild variant="ghost" size="sm" className="text-white/40 hover:text-white font-mono text-[11px] tracking-widest uppercase">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <Button
+                size="sm"
+                className="bg-amber-400 text-[#080a0f] hover:bg-amber-300 font-mono text-[11px] tracking-widest uppercase rounded-sm"
+                onClick={logoutAction}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm" className="text-white/40 hover:text-white font-mono text-[11px] tracking-widest uppercase">
+                <Link href="/login">Login</Link>
+              </Button>
+              <Button asChild size="sm" className="bg-amber-400 text-[#080a0f] hover:bg-amber-300 font-mono text-[11px] tracking-widest uppercase rounded-sm">
+                <Link href="/signup">Start free</Link>
+              </Button>
+            </>
+          )}
         </div>
       </nav>
 
@@ -175,8 +190,8 @@ export default function LandingPage() {
           ].map((p) => (
             <Card key={p.tier}
               className={`relative border rounded-xl transition-colors ${p.featured
-                  ? "border-amber-400/40 bg-gradient-to-b from-[#111620] to-[#0e1117]"
-                  : "border-white/[0.07] bg-[#0e1117] hover:border-white/[0.14]"
+                ? "border-amber-400/40 bg-gradient-to-b from-[#111620] to-[#0e1117]"
+                : "border-white/[0.07] bg-[#0e1117] hover:border-white/[0.14]"
                 }`}>
               {p.featured && (
                 <div className="absolute -top-px left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-400 text-[#080a0f] text-[9px] tracking-widest uppercase font-bold rounded-b-lg font-mono">
@@ -200,8 +215,8 @@ export default function LandingPage() {
                 </ul>
                 <Button asChild
                   className={`w-full font-mono text-[10px] tracking-widest uppercase rounded-sm h-10 ${p.featured
-                      ? "bg-amber-400 text-[#080a0f] hover:bg-amber-300"
-                      : "bg-transparent border border-white/[0.07] text-white/40 hover:text-white/70 hover:border-white/20"
+                    ? "bg-amber-400 text-[#080a0f] hover:bg-amber-300"
+                    : "bg-transparent border border-white/[0.07] text-white/40 hover:text-white/70 hover:border-white/20"
                     }`}
                   variant={p.featured ? "default" : "outline"}>
                   <Link href="/signup">{p.cta}</Link>
@@ -236,7 +251,7 @@ export default function LandingPage() {
       {/* ══ FOOTER ═══════════════════════════════════════════ */}
       <footer className="border-t border-white/[0.07] px-6 md:px-12 py-8 flex items-center justify-between flex-wrap gap-4">
         <a href="/" className="text-base text-white/40 no-underline font-serif">
-          MailWarm<span className="text-amber-400">.</span>
+          MailWarm
         </a>
         <span className="text-[10px] tracking-widest text-white/20 font-mono">© 2025 MailWarm. All rights reserved.</span>
       </footer>
