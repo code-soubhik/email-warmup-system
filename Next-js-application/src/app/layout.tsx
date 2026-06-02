@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 import { TanstackProvider } from "@/providers/TanstackProvider";
 import { verifySession } from '../lib/authSession';
 import { SessionProvider } from "@/providers/SessionProvider";
-import { UserSessionInterface } from "@/types/interfaces";
+import { Toaster, toast } from 'sonner'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +39,7 @@ export default async function RootLayout({
         <SessionProvider defaultValue={session}>
           <ThemeProvider>
             <TanstackProvider>
+              <Toaster />
               {children}
             </TanstackProvider>
           </ThemeProvider>

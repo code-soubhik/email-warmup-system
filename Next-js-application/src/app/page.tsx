@@ -26,7 +26,7 @@ export default function LandingPage() {
         <div className="flex items-center gap-3">
           {isAuth ? (
             <>
-              <Button asChild variant="ghost" size="sm" className="text-white/40 hover:text-white font-mono text-[11px] tracking-widest uppercase">
+              <Button asChild variant="ghost" size="sm" className="font-mono text-[11px] tracking-widest uppercase">
                 <Link href="/dashboard">Dashboard</Link>
               </Button>
               <Button
@@ -78,7 +78,7 @@ export default function LandingPage() {
 
         <div className="flex items-center gap-4 flex-wrap justify-center">
           <Button asChild className="h-12 px-8 bg-amber-400 text-[#080a0f] hover:bg-amber-300 font-mono text-[11px] tracking-widest uppercase rounded-sm hover:-translate-y-px transition-all">
-            <Link href="/signup">Start warming — it's free</Link>
+            <Link href="/emails">Start warming — it's free</Link>
           </Button>
           <Button asChild variant="outline" className="h-12 px-8 border-white/[0.07] bg-transparent text-white/40 hover:bg-white/[0.03] hover:text-white/70 font-mono text-[11px] tracking-widest uppercase rounded-sm">
             <a href="#how">See how it works</a>

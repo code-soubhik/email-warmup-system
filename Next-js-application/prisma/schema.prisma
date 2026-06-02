@@ -30,6 +30,13 @@ enum STATUS_TYPE {
   FAILED
 }
 
+enum EMAIL_STATUS {
+  ACTIVE              // OAuth works
+  DISCONNECTED        //  User manually disabled
+  ERROR               // Temporary Gmail API issue
+  RECONNECT_REQUIRED  //  Google revoked refresh token
+}
+
 model User {
   id            Int           @id @default(autoincrement())
   email         String        @unique
@@ -71,12 +78,12 @@ model EmailConfig {
   provider EMAIL_PROVIDER @default(GMAIL)
 
   // OAuth tokens (encrypted before storing)
-  accessToken  String
+  accessToken  String?
   refreshToken String
-  expiryDate   DateTime
+  expiryDate   DateTime?
 
   // status handling
-  isActive Boolean @default(true)
+  status EMAIL_STATUS @default(ACTIVE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -121,7 +128,6 @@ model WarmupConfig {
   replyProbability Float
 
   startTime DateTime
-  isActive  Boolean  @default(true)
 
   createdAt DateTime @default(now())
 

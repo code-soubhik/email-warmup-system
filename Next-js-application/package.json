@@ -27,6 +27,7 @@
     "bullmq": "^5.63.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "googleapis": "^173.0.0",
     "input-otp": "^1.4.2",
     "jose": "^6.1.0",
     "lucide-react": "^0.552.0",
@@ -39,6 +40,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "redis": "^5.12.1",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
