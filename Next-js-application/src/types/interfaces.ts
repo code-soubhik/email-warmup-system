@@ -3,7 +3,7 @@ import { JWTPayload } from "jose";
 interface LoggedInUserSessionInterface {
   userId: string | null;
   isAuth: true;
-  subscription: "free" | "pro" | "premium";
+  subscription?: "free" | "pro" | "premium";
 }
 
 interface NonLoggedInUserSessionInterface {
@@ -21,7 +21,7 @@ export interface Theme {
 
 export interface UserSessionPayload extends JWTPayload {
   userId: string;
-  expiresAt: Date;
+  subscription?: "free" | "pro" | "premium";
 }
 
 export interface UserThemePayload extends JWTPayload {

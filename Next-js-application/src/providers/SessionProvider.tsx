@@ -12,7 +12,7 @@ const SessionContext = createContext<SessionContextType | null>(null)
 export const SessionProvider = ({
   children,
   defaultValue
-}: {
+  }: {
   children: ReactNode
   defaultValue: UserSessionInterface
 }) => {

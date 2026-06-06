@@ -6,11 +6,11 @@ const encodedKey = new TextEncoder().encode(secretKey)
 
 type AcceptedPayloadType = UserSessionPayload | UserThemePayload;
 
-export async function encryptSession(payload: AcceptedPayloadType): Promise<string> {
+export async function encryptSession(payload: AcceptedPayloadType, expiresAt: Date): Promise<string> {
     return new SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
-        .setExpirationTime('7d')
+        .setExpirationTime(expiresAt)
         .sign(encodedKey)
 }
 
