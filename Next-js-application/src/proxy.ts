@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // 🔐 Routes that require authentication
-const authRequiredRoutes = ['/dashboard']
+const authRequiredRoutes = ['/dashboard', '/emails']
 
 // 🚪 Routes only for unauthenticated users
 const guestOnlyRoutes = ['/login', '/signup']

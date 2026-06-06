@@ -23,7 +23,7 @@ const WarmupChart = () => {
           <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
           <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
           <span className="ml-2 text-[10px] tracking-widest uppercase text-white/30 font-mono">
-            warmup_ramp — emails per day
+            warmup_ramp  emails per day
           </span>
         </div>
         <CardContent className="p-6 md:p-8 space-y-3.5">

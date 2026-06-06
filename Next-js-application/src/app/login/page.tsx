@@ -11,7 +11,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#080a0f]">
 
-      {/* left decorative panel — hidden on mobile */}
+      {/* left decorative panel  hidden on mobile */}
       <div className="hidden lg:flex lg:w-1/2 h-full flex-col justify-between p-14 border-r border-white/[0.07] relative overflow-hidden">
         {/* grid */}
         <div className="pointer-events-none absolute inset-0"
@@ -45,7 +45,7 @@ export default function LoginPage() {
 
         {/* mobile wordmark */}
         <p className="lg:hidden text-xl font-serif text-[#e8e6e1] mb-10">
-          MailWarm<span className="text-amber-400">.</span>
+          EmailWarmup<span className="text-amber-400">.</span>
         </p>
 
         <div className="w-full max-w-sm space-y-8">

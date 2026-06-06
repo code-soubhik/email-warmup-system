@@ -7,48 +7,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import WarmupChart from "@/components/WarmupChart";
 import Label from "@/components/Label";
-import { useSessionAuth } from "@/providers/SessionProvider";
-import { logoutAction } from "@/actions/auth";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export default function LandingPage() {
-  const { session } = useSessionAuth();
-  const isAuth = session.userId !== null;
 
   return (
     <div className="bg-[#080a0f] text-[#e8e6e1] min-h-screen overflow-x-hidden">
 
-      {/* ══ NAV ══════════════════════════════════════════════ */}
-      <nav className="fixed top-0 inset-x-0 z-50 h-16 flex items-center justify-between px-6 md:px-12 border-b border-white/[0.07] bg-[#080a0f]/80 backdrop-blur-xl">
-        <a href="/" className="text-xl tracking-tight text-[#e8e6e1] no-underline font-serif">
-          EmailWarmup
-        </a>
-
-        <div className="flex items-center gap-3">
-          {isAuth ? (
-            <>
-              <Button asChild variant="ghost" size="sm" className="font-mono text-[11px] tracking-widest uppercase">
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-              <Button
-                size="sm"
-                className="bg-amber-400 text-[#080a0f] hover:bg-amber-300 font-mono text-[11px] tracking-widest uppercase rounded-sm"
-                onClick={logoutAction}
-              >
-                Logout
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button asChild variant="ghost" size="sm" className="text-white/40 hover:text-white font-mono text-[11px] tracking-widest uppercase">
-                <Link href="/login">Login</Link>
-              </Button>
-              <Button asChild size="sm" className="bg-amber-400 text-[#080a0f] hover:bg-amber-300 font-mono text-[11px] tracking-widest uppercase rounded-sm">
-                <Link href="/signup">Start free</Link>
-              </Button>
-            </>
-          )}
-        </div>
-      </nav>
+      {/* ══ Header ══════════════════════════════════════════════ */}
+      <Header />
 
       {/* ══ HERO ═════════════════════════════════════════════ */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-20 overflow-hidden">
@@ -63,7 +31,7 @@ export default function LandingPage() {
         <Badge variant="outline"
           className="mb-10 gap-2 px-4 py-1.5 rounded-full border-amber-400/30 bg-amber-400/10 text-amber-400 font-mono text-[10px] tracking-[0.12em] uppercase">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-          Gmail OAuth2 — No SMTP required
+          Gmail OAuth2 No SMTP required
         </Badge>
 
         <h1 className="text-5xl md:text-7xl lg:text-[96px] leading-none tracking-[-0.03em] text-[#e8e6e1] max-w-4xl mb-5 font-serif">
@@ -73,12 +41,12 @@ export default function LandingPage() {
         </h1>
 
         <p className="text-base md:text-lg text-white/40 max-w-md leading-relaxed font-light mb-12">
-          MailWarm simulates real human conversations to build your sender reputation — gradually, safely, automatically.
+          EmailWarmup simulates real human conversations to build your sender reputation  gradually, safely, automatically.
         </p>
 
         <div className="flex items-center gap-4 flex-wrap justify-center">
           <Button asChild className="h-12 px-8 bg-amber-400 text-[#080a0f] hover:bg-amber-300 font-mono text-[11px] tracking-widest uppercase rounded-sm hover:-translate-y-px transition-all">
-            <Link href="/emails">Start warming — it's free</Link>
+            <Link href="/emails">Start warming  it's free</Link>
           </Button>
           <Button asChild variant="outline" className="h-12 px-8 border-white/[0.07] bg-transparent text-white/40 hover:bg-white/[0.03] hover:text-white/70 font-mono text-[11px] tracking-widest uppercase rounded-sm">
             <a href="#how">See how it works</a>
@@ -114,12 +82,12 @@ export default function LandingPage() {
           Three steps to a <em className="italic text-amber-400 font-serif">trusted</em> inbox.
         </h2>
         <p className="text-sm text-white/40 max-w-sm leading-relaxed font-light mb-14">
-          No technical setup. No SMTP. Just connect your Gmail and let MailWarm do the rest.
+          No technical setup. No SMTP. Just connect your Gmail and let EmailWarmup do the rest.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/[0.07] border border-white/[0.07] rounded-xl overflow-hidden">
           {[
-            { num: "01", icon: "🔗", title: "Connect Gmail", body: "Authorize via Google OAuth2. No passwords stored — ever. Tokens AES-256 encrypted at rest." },
+            { num: "01", icon: "🔗", title: "Connect Gmail", body: "Authorize via Google OAuth2. No passwords stored  ever. Tokens AES-256 encrypted at rest." },
             { num: "02", icon: "⚙️", title: "Configure warmup", body: "Set your email target, send interval, and reply window. Ramp-up is handled automatically." },
             { num: "03", icon: "📈", title: "Watch it grow", body: "Live dashboard shows every email, reply, and thread. Health score updates in real time." },
           ].map((s) => (
@@ -145,7 +113,7 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px border border-white/[0.07] rounded-xl overflow-hidden bg-white/[0.07]">
           {[
             { icon: "🧠", title: "Human-like replies", body: "Varied templates, randomised send times and reply delays. Indistinguishable from real conversations." },
-            { icon: "⏱️", title: "Chained scheduling", body: "Each sent email spawns the next with a random delay — no cron jobs, no missed windows, no bulk bursts." },
+            { icon: "⏱️", title: "Chained scheduling", body: "Each sent email spawns the next with a random delay  no cron jobs, no missed windows, no bulk bursts." },
             { icon: "🔐", title: "OAuth2 only", body: "Gmail connected via Google OAuth2. Access tokens auto-refresh. Zero SMTP credentials stored." },
             { icon: "📡", title: "Live dashboard", body: "WebSocket-powered real-time feed. Watch emails send and replies arrive as they happen." },
             { icon: "🧵", title: "Thread depth tracking", body: "Replies stay in-thread with proper headers. Depth tracked per conversation for authentic signals." },
@@ -235,7 +203,7 @@ export default function LandingPage() {
             Stop landing in <em className="italic text-amber-400 font-serif">spam.</em>
           </h2>
           <p className="relative text-sm text-white/40 mb-10 font-light">
-            Join thousands of senders who trust MailWarm to build their reputation.
+            Join thousands of senders who trust EmailWarmup to build their reputation.
           </p>
           <div className="relative flex items-center gap-4 justify-center flex-wrap">
             <Button asChild className="h-12 px-8 bg-amber-400 text-[#080a0f] hover:bg-amber-300 font-mono text-[11px] tracking-widest uppercase rounded-sm hover:-translate-y-px transition-all">
@@ -249,12 +217,7 @@ export default function LandingPage() {
       </div>
 
       {/* ══ FOOTER ═══════════════════════════════════════════ */}
-      <footer className="border-t border-white/[0.07] px-6 md:px-12 py-8 flex items-center justify-between flex-wrap gap-4">
-        <a href="/" className="text-base text-white/40 no-underline font-serif">
-          MailWarm
-        </a>
-        <span className="text-[10px] tracking-widest text-white/20 font-mono">© 2025 MailWarm. All rights reserved.</span>
-      </footer>
+      <Footer />
 
     </div>
   );
