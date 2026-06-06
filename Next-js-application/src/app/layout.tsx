@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Instrument_Serif, DM_Mono } from "next/font/google"
+import { Geist, Geist_Mono, Instrument_Serif, DM_Mono } from "next/font/google";
 import "./globals.css";
+
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { TanstackProvider } from "@/providers/TanstackProvider";
-import { verifySession } from '../lib/authSession';
+import { verifySession } from "@/lib/authSession";
 import { SessionProvider } from "@/providers/SessionProvider";
-import { Toaster, toast } from 'sonner'
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,9 +18,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const serif = Instrument_Serif({ variable: "--font-serif", subsets: ["latin"], weight: "400", style: ["normal", "italic"] })
-const mono = DM_Mono({ variable: "--font-mono", subsets: ["latin"], weight: ["300", "400", "500"] })
+const serif = Instrument_Serif({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+});
 
+const mono = DM_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -29,13 +38,16 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   const session = await verifySession();
+
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${serif.variable} ${mono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${serif.variable} ${mono.variable} antialiased`}
+      >
         <SessionProvider defaultValue={session}>
           <ThemeProvider>
             <TanstackProvider>
@@ -45,6 +57,6 @@ export default async function RootLayout({
           </ThemeProvider>
         </SessionProvider>
       </body>
-    </html >
+    </html>
   );
 }

@@ -1,10 +1,19 @@
 import { JWTPayload } from "jose";
 
-export interface UserSessionInterface {
+interface LoggedInUserSessionInterface {
   userId: string | null;
-  isAuth: boolean;
+  isAuth: true;
   subscription: "free" | "pro" | "premium";
 }
+
+interface NonLoggedInUserSessionInterface {
+  userId: null;
+  isAuth: false;
+}
+
+export type UserSessionInterface = 
+  LoggedInUserSessionInterface
+  | NonLoggedInUserSessionInterface;
 
 export interface Theme {
   theme: "dark" | "light";

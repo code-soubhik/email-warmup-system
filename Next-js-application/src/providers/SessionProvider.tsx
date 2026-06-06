@@ -1,11 +1,10 @@
 "use client"
 
 import { UserSessionInterface } from "@/types/interfaces"
-import { createContext, ReactNode, useContext, useState } from "react"
+import { createContext, ReactNode, useContext } from "react"
 
 type SessionContextType = {
   session: UserSessionInterface
-  setSession: React.Dispatch<React.SetStateAction<UserSessionInterface>>
 }
 
 const SessionContext = createContext<SessionContextType | null>(null)
@@ -17,10 +16,8 @@ export const SessionProvider = ({
   children: ReactNode
   defaultValue: UserSessionInterface
 }) => {
-  const [session, setSession] = useState<UserSessionInterface>(defaultValue)
-
   return (
-    <SessionContext.Provider value={{ session, setSession }}>
+    <SessionContext.Provider value={{ session: defaultValue }}>
       {children}
     </SessionContext.Provider>
   )
@@ -33,5 +30,5 @@ export const useSessionAuth = () => {
     throw new Error("useSession must be used inside SessionProvider")
   }
 
-  return context
+  return context.session
 }
