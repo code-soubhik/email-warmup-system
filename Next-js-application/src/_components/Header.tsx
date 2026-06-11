@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { logoutAction } from "@/actions/auth";
-import { useSessionAuth } from "@/providers/SessionProvider";
+import { Button } from "@/_components/ui/button";
+import { logoutAction } from "@/_actions/auth";
+import { useSessionAuth } from "@/_providers/SessionProvider";
 
 const Header = () => {
     const { isAuth } = useSessionAuth();

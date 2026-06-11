@@ -3,7 +3,7 @@ import React from 'react'
 const Footer = () => {
     return (
         <>
-            <footer className="border-t border-white/[0.07] px-6 md:px-12 py-8 flex items-center justify-between flex-wrap gap-4">
+            <footer className="bg-[#080a0f] text-[#e8e6e1] border-t border-white/[0.07] px-6 md:px-12 py-8 flex items-center justify-between flex-wrap gap-4">
                 <a href="/" className="text-base text-white/40 no-underline font-serif">
                     EmailWarmup
                 </a>

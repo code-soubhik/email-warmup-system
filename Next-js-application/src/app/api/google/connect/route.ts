@@ -1,8 +1,8 @@
 import crypto from "crypto";
-import { withRateLimit } from "@/lib/rateLimit";
-import { createOAuthClient } from "@/lib/google";
-import { redis } from "@/lib/redis";
-import { verifySession } from "@/lib/authSession";
+import { withRateLimit } from "@/_lib/rateLimit";
+import { createOAuthClient } from "@/_lib/google";
+import { redis } from "@/_lib/redis";
+import { verifySession } from "@/_lib/authSession";
 
 async function getHandler() {
     console.log("CAlled Callbakc")

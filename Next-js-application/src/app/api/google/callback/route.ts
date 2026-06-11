@@ -1,10 +1,10 @@
-import { withRateLimit } from "@/lib/rateLimit";
-import { createOAuthClient } from "@/lib/google";
-import { redis } from "@/lib/redis";
+import { withRateLimit } from "@/_lib/rateLimit";
+import { createOAuthClient } from "@/_lib/google";
+import { redis } from "@/_lib/redis";
 
 import { google } from "googleapis";
-import prisma from "@/lib/prisma";
-import { encrypt } from "@/lib/crypto";
+import prisma from "@/_lib/prisma";
+import { encrypt } from "@/_lib/crypto";
 
 async function getHandler(req: Request) {
     const url = new URL(req.url);

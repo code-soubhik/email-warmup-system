@@ -1,9 +1,9 @@
 import 'server-only'
 import { cookies } from 'next/headers'
-import { SESSION_COOKIE_NAME } from '@/utils/constant'
+import { SESSION_COOKIE_NAME } from '@/_utils/constant'
 import { decryptSession, encryptSession } from './encryptDecrypt'
 import { cache } from 'react'
-import { UserSessionInterface } from '@/types/interfaces'
+import { UserSessionInterface } from '@/_types/interfaces'
 
 export async function createSession(userId: string) {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)

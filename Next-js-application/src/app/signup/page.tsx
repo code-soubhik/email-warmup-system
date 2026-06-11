@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { sendOtpAction, signupAction } from "@/actions/auth";
+import { Button } from "@/_components/ui/button";
+import { Input } from "@/_components/ui/input";
+import { sendOtpAction, signupAction } from "@/_actions/auth";
 
 export default function SignupPage() {
   const [otpSent, setOtpSent] = useState(false);

@@ -2,12 +2,12 @@
 
 import { redirect } from 'next/navigation'
 import argon2 from "argon2"
-import prisma from '@/lib/prisma'
+import prisma from '@/_lib/prisma'
 
-import { createSession, deleteSession } from '@/lib/authSession'
-import { redis } from '@/lib/redis'
-import { getClientIp } from '../utils/serverUtils';
-import { sendEmail } from '@/lib/sendEMail'
+import { createSession, deleteSession } from '@/_lib/authSession'
+import { redis } from '@/_lib/redis'
+import { getClientIp } from '../_utils/serverUtils';
+import { sendEmail } from '@/_lib/sendEMail'
 
 if (!process.env.PEPPER) {
   throw new Error("Missing PEPPER env variable");

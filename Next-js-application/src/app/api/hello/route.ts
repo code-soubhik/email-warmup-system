@@ -1,4 +1,4 @@
-import { withRateLimit } from "@/lib/rateLimit"
+import { withRateLimit } from "@/_lib/rateLimit"
 
 async function handler() {
   return Response.json({ message: 'Hello World', time: new Date().toLocaleTimeString()})

@@ -1,7 +1,7 @@
 import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 import { redis } from "./redis";
-import rateLimitConfig from "@/utils/rateLimitConfig";
+import rateLimitConfig from "@/_utils/rateLimitConfig";
 
 export function withRateLimit(handler: any) {
   return async (req: NextRequest) => {

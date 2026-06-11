@@ -1,6 +1,6 @@
 "use client"
 
-import { UserSessionInterface } from "@/types/interfaces"
+import { UserSessionInterface } from "@/_types/interfaces"
 import { createContext, ReactNode, useContext } from "react"
 
 type SessionContextType = {

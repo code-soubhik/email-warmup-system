@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Instrument_Serif, DM_Mono } from "next/font/google";
 import "./globals.css";
 
-import { ThemeProvider } from "@/providers/ThemeProvider";
-import { TanstackProvider } from "@/providers/TanstackProvider";
-import { verifySession } from "@/lib/authSession";
-import { SessionProvider } from "@/providers/SessionProvider";
+import { ThemeProvider } from "@/_providers/ThemeProvider";
+import { TanstackProvider } from "@/_providers/TanstackProvider";
+import { verifySession } from "@/_lib/authSession";
+import { SessionProvider } from "@/_providers/SessionProvider";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({

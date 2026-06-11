@@ -1,5 +1,5 @@
 import { JWTPayload, SignJWT, jwtVerify } from 'jose'
-import { UserThemePayload, UserSessionPayload } from '../types/interfaces';
+import { UserThemePayload, UserSessionPayload } from '../_types/interfaces';
 
 const secretKey = process.env.SESSION_SECRET
 const encodedKey = new TextEncoder().encode(secretKey)

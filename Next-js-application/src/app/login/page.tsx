@@ -1,8 +1,8 @@
 "use client";
 
-import { loginAction } from "@/actions/auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { loginAction } from "@/_actions/auth";
+import { Button } from "@/_components/ui/button";
+import { Input } from "@/_components/ui/input";
 import { useActionState } from "react";
 
 export default function LoginPage() {

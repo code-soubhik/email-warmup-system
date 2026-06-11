@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "./ui/card";
-import { RAMP } from "@/utils/constant";
+import { RAMP } from "@/_utils/constant";
 
 const WarmupChart = () => {
   const [animated, setAnimated] = useState(false);

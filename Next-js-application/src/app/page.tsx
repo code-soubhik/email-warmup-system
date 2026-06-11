@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import WarmupChart from "@/components/WarmupChart";
-import Label from "@/components/Label";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { Badge } from "@/_components/ui/badge";
+import { Button } from "@/_components/ui/button";
+import { Card, CardContent } from "@/_components/ui/card";
+import { Separator } from "@/_components/ui/separator";
+import WarmupChart from "@/_components/WarmupChart";
+import Label from "@/_components/Label";
+import Header from "@/_components/Header";
+import Footer from "@/_components/Footer";
 
 export default function LandingPage() {
 
@@ -126,71 +126,6 @@ export default function LandingPage() {
               <h3 className="text-base tracking-tight text-[#e8e6e1] mb-2 font-serif">{f.title}</h3>
               <p className="text-sm text-white/40 leading-relaxed font-light">{f.body}</p>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ══ PRICING ══════════════════════════════════════════ */}
-      <section id="pricing" className="border-t border-white/[0.07] px-6 py-24 max-w-5xl mx-auto">
-        <Label>Pricing</Label>
-        <h2 className="text-4xl md:text-5xl leading-tight tracking-[-0.02em] text-[#e8e6e1] mb-4 font-serif">
-          Simple, honest <em className="italic text-amber-400 font-serif">pricing.</em>
-        </h2>
-        <p className="text-sm text-white/40 mb-14 font-light">No usage surprises. Pay for accounts, not emails.</p>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            {
-              tier: "Starter", price: "0", period: "forever free", featured: false,
-              features: ["1 Gmail account", "20 emails / day", "Basic analytics", "Community support"],
-              cta: "Get started",
-            },
-            {
-              tier: "Pro", price: "19", period: "per month", featured: true,
-              features: ["5 Gmail accounts", "100 emails / day", "Live dashboard", "Priority support", "Custom intervals"],
-              cta: "Start free trial",
-            },
-            {
-              tier: "Team", price: "49", period: "per month", featured: false,
-              features: ["Unlimited accounts", "Unlimited emails", "Full analytics", "Dedicated support", "API access"],
-              cta: "Contact us",
-            },
-          ].map((p) => (
-            <Card key={p.tier}
-              className={`relative border rounded-xl transition-colors ${p.featured
-                ? "border-amber-400/40 bg-gradient-to-b from-[#111620] to-[#0e1117]"
-                : "border-white/[0.07] bg-[#0e1117] hover:border-white/[0.14]"
-                }`}>
-              {p.featured && (
-                <div className="absolute -top-px left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-400 text-[#080a0f] text-[9px] tracking-widest uppercase font-bold rounded-b-lg font-mono">
-                  Most popular
-                </div>
-              )}
-              <CardContent className="p-8">
-                <p className="text-[10px] tracking-widest uppercase text-white/30 mb-3 font-mono">{p.tier}</p>
-                <div className="flex items-end gap-0.5 mb-1">
-                  <span className="text-sm text-white/40 mb-1.5 font-light">$</span>
-                  <span className="text-5xl leading-none tracking-tight text-[#e8e6e1] font-serif">{p.price}</span>
-                </div>
-                <p className="text-[10px] tracking-widest text-white/30 mb-6 font-mono">{p.period}</p>
-                <Separator className="bg-white/[0.07] mb-6" />
-                <ul className="space-y-2.5 mb-8">
-                  {p.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2.5 text-sm text-white/50 font-light">
-                      <span className="text-amber-400 text-xs">✓</span>{f}
-                    </li>
-                  ))}
-                </ul>
-                <Button asChild
-                  className={`w-full font-mono text-[10px] tracking-widest uppercase rounded-sm h-10 ${p.featured
-                    ? "bg-amber-400 text-[#080a0f] hover:bg-amber-300"
-                    : "bg-transparent border border-white/[0.07] text-white/40 hover:text-white/70 hover:border-white/20"
-                    }`}
-                  variant={p.featured ? "default" : "outline"}>
-                  <Link href="/signup">{p.cta}</Link>
-                </Button>
-              </CardContent>
-            </Card>
           ))}
         </div>
       </section>

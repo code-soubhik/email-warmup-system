@@ -1,6 +1,6 @@
 import 'server-only'
 import { cookies } from 'next/headers'
-import { THEME_COOKIE_NAME } from '@/utils/constant';
+import { THEME_COOKIE_NAME } from '@/_utils/constant';
 
 
 export async function setTheme(themeValue: "dark" | "light") {

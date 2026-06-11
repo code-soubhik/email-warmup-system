@@ -1,6 +1,6 @@
-import EmailList from "@/components/EmailList";
-import { verifySession } from "@/lib/authSession";
-import prisma from "@/lib/prisma";
+import EmailList from "@/_components/EmailList";
+import { verifySession } from "@/_lib/authSession";
+import prisma from "@/_lib/prisma";
 
 export default async function EmailsPage() {
   const { userId } = await verifySession();
