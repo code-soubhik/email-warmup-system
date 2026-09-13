@@ -1,10 +1,11 @@
-name: Next.js CI
+name: CI
 
 on:
   push:
     branches:
       - main
       - dev
+
   pull_request:
     branches:
       - main
@@ -14,15 +15,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install and build
-        run: |
-          cd Next-js-application
-          npm i
-          npm run build
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Next-js-application/package-lock.json
+
+      - name: Install dependencies
+        working-directory: Next-js-application
+        run: npm ci
+
+      - name: Build
+        working-directory: Next-js-application
+        run: npm run build
 
       - name: Verify Next.js build
         run: test -d Next-js-application/.next
