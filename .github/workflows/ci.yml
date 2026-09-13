@@ -15,6 +15,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+      PEPPER: ${{ secrets.PEPPER }}
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASS: ${{ secrets.SMTP_PASS }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+      APP_URL: ${{ secrets.APP_URL }}
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
     services:
       redis:
         image: redis:7
