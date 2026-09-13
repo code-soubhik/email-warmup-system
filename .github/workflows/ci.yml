@@ -1,0 +1,26 @@
+name: Next.js CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install and build
+        run: |
+          cd Next-js-application
+          npm i
+          npm run build
+
+      - name: Verify Next.js build
+        run: test -d Next-js-application/.next
