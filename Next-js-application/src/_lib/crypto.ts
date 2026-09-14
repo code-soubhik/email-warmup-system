@@ -29,3 +29,26 @@ export function encrypt(text: string) {
     encrypted,
   });
 }
+
+
+export function decrypt(encryptedData: string): string {
+  const { iv, tag, encrypted } = JSON.parse(encryptedData);
+
+  const decipher = crypto.createDecipheriv(
+    "aes-256-gcm",
+    key,
+    Buffer.from(iv, "hex")
+  );
+
+  decipher.setAuthTag(Buffer.from(tag, "hex"));
+
+  let decrypted = decipher.update(
+    encrypted,
+    "hex",
+    "utf8"
+  );
+
+  decrypted += decipher.final("utf8");
+
+  return decrypted;
+}

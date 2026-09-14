@@ -27,6 +27,7 @@
     "bullmq": "^5.63.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cn": "^0.3.0",
     "googleapis": "^173.0.0",
     "input-otp": "^1.4.2",
     "jose": "^6.1.0",

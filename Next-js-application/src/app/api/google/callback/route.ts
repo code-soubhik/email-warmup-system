@@ -1,10 +1,10 @@
 import { withRateLimit } from "@/_lib/rateLimit";
 import { createOAuthClient } from "@/_lib/google";
 import { redis } from "@/_lib/redis";
+import { encrypt, decrypt } from "@/_lib/crypto";
 
 import { google } from "googleapis";
 import prisma from "@/_lib/prisma";
-import { encrypt } from "@/_lib/crypto";
 
 async function getHandler(req: Request) {
     const url = new URL(req.url);
@@ -26,21 +26,49 @@ async function getHandler(req: Request) {
         );
     }
 
-    const key = await redis.get(`oauth:${state}`);
-    const userId = parseInt(key as string);
+    const key = `oauth:${state}`;
 
-    if (!userId) {
+    const value = await redis.get(key);
+
+    if (!value) {
         return Response.json(
-            { error: "Invalid state" },
+            { error: "Invalid or expired invitation" },
             { status: 400 }
         );
     }
 
-    await redis.del(`oauth:${state}`);
+    let invitation: {
+        inviterUserID: string;
+        invitedEmail: string;
+    };
+
+    try {
+        invitation = JSON.parse(value);
+    } catch {
+        return Response.json(
+            { error: "Invalid invitation data" },
+            { status: 400 }
+        );
+    }
+
+    const {
+        inviterUserID,
+        invitedEmail: encryptedEmail,
+    } = invitation;
+
+    if (!inviterUserID || !encryptedEmail) {
+        return Response.json(
+            { error: "Invalid invitation data" },
+            { status: 400 }
+        );
+    }
+
+    const invitedEmail = decrypt(encryptedEmail);
 
     const oauth2Client = createOAuthClient();
 
-    const { tokens } = await oauth2Client.getToken(code);
+    const { tokens } =
+        await oauth2Client.getToken(code);
 
     if (!tokens.refresh_token) {
         return Response.json(
@@ -61,19 +89,35 @@ async function getHandler(req: Request) {
             userId: "me",
         });
 
-    const gmailAddress = profile.data.emailAddress;
+    const gmailAddress =
+        profile.data.emailAddress;
 
     if (!gmailAddress) {
-        throw new Error(
-            "Unable to fetch Gmail address"
+        return Response.json(
+            { error: "Unable to fetch Gmail address" },
+            { status: 400 }
         );
     }
-    // Add to DB
+
+    if (
+        gmailAddress.toLowerCase() !==
+        invitedEmail.toLowerCase()
+    ) {
+        return Response.json(
+            {
+                error:
+                    "Google account does not match invited email",
+            },
+            { status: 403 }
+        );
+    }
+
+    const userId = parseInt(inviterUserID);
 
     await prisma.emailConfig.upsert({
         where: {
             userId_email: {
-                userId: userId,
+                userId,
                 email: gmailAddress,
             },
         },
@@ -83,7 +127,9 @@ async function getHandler(req: Request) {
                 ? encrypt(tokens.access_token)
                 : undefined,
 
-            refreshToken: encrypt(tokens.refresh_token),
+            refreshToken: encrypt(
+                tokens.refresh_token
+            ),
 
             expiryDate: tokens.expiry_date
                 ? new Date(tokens.expiry_date)
@@ -95,14 +141,15 @@ async function getHandler(req: Request) {
         create: {
             userId,
             email: gmailAddress,
-
             provider: "GMAIL",
 
             accessToken: tokens.access_token
                 ? encrypt(tokens.access_token)
                 : null,
 
-            refreshToken: encrypt(tokens.refresh_token),
+            refreshToken: encrypt(
+                tokens.refresh_token
+            ),
 
             expiryDate: tokens.expiry_date
                 ? new Date(tokens.expiry_date)
@@ -112,9 +159,12 @@ async function getHandler(req: Request) {
         },
     });
 
+    // Consume invitation after successful connection
+    await redis.del(key);
 
-
-    return Response.redirect(`${process.env.APP_URL}/emails?status=connected`);
+    return Response.redirect(
+        `${process.env.APP_URL}/emails?status=connected`
+    );
 }
 
 export const GET = withRateLimit(getHandler);

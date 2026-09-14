@@ -1,29 +1,29 @@
-import crypto from "crypto";
 import { withRateLimit } from "@/_lib/rateLimit";
 import { createOAuthClient } from "@/_lib/google";
 import { redis } from "@/_lib/redis";
-import { verifySession } from "@/_lib/authSession";
+import { NextRequest } from "next/server";
 
-async function getHandler() {
-    console.log("CAlled Callbakc")
+async function getHandler(request: NextRequest) {
+    const state =
+        request.nextUrl.searchParams.get("state");
 
-    const { userId, isAuth } = await verifySession();
-
-    if (!isAuth || !userId) {
+    if (!state) {
         return Response.json(
-            { error: "Unauthorized" },
-            { status: 401 }
+            { error: "Malformed URL" },
+            { status: 400 }
         );
     }
 
-    const state = crypto.randomBytes(32).toString("hex");
+    const invitation = await redis.get(
+        `oauth:${state}`
+    );
 
-    const key = `oauth:${state}`;
-    const value = userId;
-
-    await redis.set(key, value, {
-      expiration: { type: 'EX', value: 10 * 60 } // seconds
-    });
+    if (!invitation) {
+        return Response.json(
+            { error: "Invalid or expired invitation" },
+            { status: 400 }
+        );
+    }
 
     const oauth2Client = createOAuthClient();
 
@@ -37,8 +37,6 @@ async function getHandler() {
             "https://www.googleapis.com/auth/gmail.readonly",
         ],
     });
-    
-    console.log("CALLBACK: ",url)
 
     return Response.redirect(url);
 }

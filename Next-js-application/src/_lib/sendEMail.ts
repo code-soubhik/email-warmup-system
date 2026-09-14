@@ -18,7 +18,7 @@ export async function sendEmail({
   html: string;
 }) {
   return transporter.sendMail({
-    from: `"Email Warmup Service" <${process.env.EMAIL_USER}>`,
+    from: "Email Warmup Service",
     to,
     subject,
     html,
