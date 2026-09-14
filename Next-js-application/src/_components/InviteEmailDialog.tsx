@@ -48,7 +48,7 @@ export function InviteEmailDialog() {
         // Close dialog
         setOpen(false)
       } else {
-        setMessage(result.error)
+        setMessage(result.message)
       }
     } catch {
       setMessage("Something went wrong. Please try again.")
