@@ -45,6 +45,7 @@ export async function inviteEmail(email: string): Promise<InviteEmailType> {
     where: {
       userId: parseInt(userId),
       email,
+      status: "ACTIVE"
     },
   });
 
