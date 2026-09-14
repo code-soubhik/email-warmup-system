@@ -1,11 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
-  // output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -13,7 +7,87 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// -------------- Enums ----------------
+model User {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  password      String?
+  providerToken String?
+  provider      PROVIDER_TYPE  @default(BASIC)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  emailConfigs  EmailConfig[]
+  warmups       WarmupConfig[]
+}
+
+model Log {
+  id               Int          @id @default(autoincrement())
+  warmupConfigId   Int
+  senderEmailId    Int
+  recipientEmailId Int
+  scheduleTime     DateTime
+  timestamp        DateTime     @default(now())
+  status           STATUS_TYPE  @default(PENDING)
+  errorMessage     String?
+  recipient        EmailConfig  @relation("ReceiverEmail", fields: [recipientEmailId], references: [id], onDelete: Cascade)
+  sender           EmailConfig  @relation("SenderEmail", fields: [senderEmailId], references: [id], onDelete: Cascade)
+  warmupConfig     WarmupConfig @relation(fields: [warmupConfigId], references: [id], onDelete: Cascade)
+
+  @@index([warmupConfigId])
+  @@index([senderEmailId])
+  @@index([recipientEmailId])
+}
+
+model EmailConfig {
+  id               Int               @id @default(autoincrement())
+  userId           Int
+  email            String
+  provider         EMAIL_PROVIDER    @default(GMAIL)
+  accessToken      String?
+  refreshToken     String
+  expiryDate       DateTime?
+  status           EMAIL_STATUS      @default(ACTIVE)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  receivedLogs     Log[]             @relation("ReceiverEmail")
+  sentLogs         Log[]             @relation("SenderEmail")
+  warmups          WarmupConfig[]    @relation("WarmupEmail")
+  warmupRecipients WarmupRecipient[]
+
+  @@unique([userId, email])
+  @@index([userId])
+  @@index([email])
+}
+
+model WarmupRecipient {
+  id             Int          @id @default(autoincrement())
+  warmupConfigId Int
+  emailConfigId  Int
+  emailConfig    EmailConfig  @relation(fields: [emailConfigId], references: [id], onDelete: Cascade)
+  warmupConfig   WarmupConfig @relation(fields: [warmupConfigId], references: [id], onDelete: Cascade)
+
+  @@index([warmupConfigId])
+  @@index([emailConfigId])
+}
+
+model WarmupConfig {
+  id               Int               @id @default(autoincrement())
+  userId           Int
+  warmupEmailId    Int
+  totalNoOfEmail   Int
+  minDelaySec      Int
+  maxDelaySec      Int
+  replyProbability Float
+  startTime        DateTime
+  createdAt        DateTime          @default(now())
+  logs             Log[]
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  warmupEmail      EmailConfig       @relation("WarmupEmail", fields: [warmupEmailId], references: [id], onDelete: Cascade)
+  recipients       WarmupRecipient[]
+
+  @@index([warmupEmailId])
+}
+
 enum PROVIDER_TYPE {
   GOOGLE
   BASIC
@@ -24,118 +98,15 @@ enum EMAIL_PROVIDER {
 }
 
 enum STATUS_TYPE {
-  PENDING // Added for queue visibility
+  PENDING
   SENT
   REPLIED
   FAILED
 }
 
 enum EMAIL_STATUS {
-  ACTIVE              // OAuth works
-  DISCONNECTED        //  User manually disabled
-  ERROR               // Temporary Gmail API issue
-  RECONNECT_REQUIRED  //  Google revoked refresh token
-}
-
-model User {
-  id            Int           @id @default(autoincrement())
-  email         String        @unique
-  password      String? // nullable for OAuth users
-  providerToken String? // e.g. Google ID or JWT
-  provider      PROVIDER_TYPE @default(BASIC)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  // Relationships
-  emailConfigs EmailConfig[]
-  warmups      WarmupConfig[]
-}
-
-model Log {
-  id               Int         @id @default(autoincrement())
-  warmupConfigId   Int
-  senderEmailId    Int
-  recipientEmailId Int
-  scheduleTime     DateTime
-  timestamp        DateTime    @default(now())
-  status           STATUS_TYPE @default(PENDING)
-  errorMessage     String? // store failure reason or debug info
-
-  // Relationships
-  warmupConfig WarmupConfig @relation(fields: [warmupConfigId], references: [id], onDelete: Cascade)
-  sender       EmailConfig  @relation("SenderEmail", fields: [senderEmailId], references: [id], onDelete: Cascade)
-  recipient    EmailConfig  @relation("ReceiverEmail", fields: [recipientEmailId], references: [id], onDelete: Cascade)
-
-  @@index([warmupConfigId])
-  @@index([senderEmailId])
-  @@index([recipientEmailId])
-}
-
-model EmailConfig {
-  id       Int            @id @default(autoincrement())
-  userId   Int
-  email    String
-  provider EMAIL_PROVIDER @default(GMAIL)
-
-  // OAuth tokens (encrypted before storing)
-  accessToken  String?
-  refreshToken String
-  expiryDate   DateTime?
-
-  // status handling
-  status EMAIL_STATUS @default(ACTIVE)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relationships
-  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  warmups          WarmupConfig[]    @relation("WarmupEmail")
-  sentLogs         Log[]             @relation("SenderEmail")
-  receivedLogs     Log[]             @relation("ReceiverEmail")
-  warmupRecipients WarmupRecipient[]
-
-  // Prevent duplicate same email for SAME user
-  @@unique([userId, email])
-  // Indexes
-  @@index([userId])
-  @@index([email])
-}
-
-model WarmupRecipient {
-  id             Int @id @default(autoincrement())
-  warmupConfigId Int
-  emailConfigId  Int
-
-  // Relationships
-  warmupConfig WarmupConfig @relation(fields: [warmupConfigId], references: [id], onDelete: Cascade)
-  emailConfig  EmailConfig  @relation(fields: [emailConfigId], references: [id], onDelete: Cascade)
-
-  @@index([warmupConfigId])
-  @@index([emailConfigId])
-}
-
-model WarmupConfig {
-  id            Int @id @default(autoincrement())
-  userId        Int
-  warmupEmailId Int
-
-  totalNoOfEmail Int
-
-  minDelaySec Int
-  maxDelaySec Int
-
-  replyProbability Float
-
-  startTime DateTime
-
-  createdAt DateTime @default(now())
-
-  // Relationships
-  warmupEmail EmailConfig       @relation("WarmupEmail", fields: [warmupEmailId], references: [id], onDelete: Cascade)
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recipients  WarmupRecipient[]
-  logs        Log[]
-
-  @@index([warmupEmailId])
+  ACTIVE
+  DISCONNECTED
+  ERROR
+  RECONNECT_REQUIRED
 }

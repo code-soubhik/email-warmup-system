@@ -5,67 +5,77 @@ import { redis } from "@/_lib/redis";
 import { sendEmail } from "@/_lib/sendEMail";
 import { verifySession } from "@/_lib/authSession";
 import { encrypt } from "@/_lib/crypto";
+import prisma from "@/_lib/prisma";
 
 interface InviteEmailResponse {
-    message: string;
+  message: string;
 }
 
 interface InviteEmailSuccess extends InviteEmailResponse {
-    success: true;
+  success: true;
 }
 
 interface InviteEmailFailure extends InviteEmailResponse {
-    success: false;
-    error: string;
+  success: false;
+  error: string;
 }
 
-type InviteEmailType =
-    | InviteEmailSuccess
-    | InviteEmailFailure;
+type InviteEmailType = InviteEmailSuccess | InviteEmailFailure;
 
-export async function inviteEmail(
-    email: string
-): Promise<InviteEmailType> {
-    if (!email?.trim()) {
-        return {
-            success: false,
-            error: "Email is required",
-            message: "Please provide an email address.",
-        };
-    }
+export async function inviteEmail(email: string): Promise<InviteEmailType> {
+  if (!email?.trim()) {
+    return {
+      success: false,
+      error: "Email is required",
+      message: "Please provide an email address.",
+    };
+  }
 
-    const { userId, isAuth } = await verifySession();
+  const { userId, isAuth } = await verifySession();
 
-    if (!isAuth || !userId) {
-        return {
-            success: false,
-            error: "User not authenticated",
-            message: "User is not authenticated.",
-        };
-    }
+  if (!isAuth || !userId) {
+    return {
+      success: false,
+      error: "USER_NOT_AUTHENTICATED",
+      message: "User is not authenticated.",
+    };
+  }
 
-    const state = crypto.randomBytes(32).toString("hex");
+  const emailExists = await prisma.emailConfig.findFirst({
+    where: {
+      userId: parseInt(userId),
+      email,
+    },
+  });
 
-    const key = `oauth:${state}`;
+  if (emailExists) {
+    return {
+      success: false,
+      error: "EMAIL_ALREADY_CONNECTED",
+      message: "This email is already connected.",
+    };
+  }
 
-    const value = JSON.stringify({
-        inviterUserID: userId,
-        invitedEmail: encrypt(email.trim()),
-    });
+  const state = crypto.randomBytes(32).toString("hex");
 
-    await redis.set(key, value, {
-        expiration: {
-            type: "EX",
-            value: 10 * 60,
-        },
-    });
+  const key = `oauth:${state}`;
 
-    const url = new URL(
-        `/api/google/connect?state=${state}`,
-        process.env.APP_URL
-    ).href;
+  const value = JSON.stringify({
+    inviterUserID: userId,
+    invitedEmail: encrypt(email.trim()),
+  });
 
-    const html = `
+  await redis.set(key, value, {
+    expiration: {
+      type: "EX",
+      value: 10 * 60,
+    },
+  });
+
+  const url = new URL(`/api/google/connect?state=${state}`, process.env.APP_URL)
+    .href;
+
+  const html = `
         <div style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 40px 20px;">
             <div style="max-width: 500px; margin: 0 auto; background: #ffffff; padding: 32px; border-radius: 8px; text-align: center;">
                 <h2 style="margin-bottom: 16px;">
@@ -103,30 +113,26 @@ export async function inviteEmail(
         </div>
     `;
 
-    try {
-        await sendEmail({
-            to: email.trim(),
-            subject: "EMAIL WARMUP | Invitation",
-            html,
-        });
+  try {
+    await sendEmail({
+      to: email.trim(),
+      subject: "EMAIL WARMUP | Invitation",
+      html,
+    });
 
-        return {
-            success: true,
-            message: "Invitation sent successfully.",
-        };
-    } catch (error) {
-        await redis.del(key);
+    return {
+      success: true,
+      message: "Invitation sent successfully.",
+    };
+  } catch (error) {
+    await redis.del(key);
 
-        console.error(
-            "Failed to send invitation:",
-            error
-        );
+    console.error("Failed to send invitation:", error);
 
-        return {
-            success: false,
-            error: "Failed to send invitation",
-            message:
-                "Unable to send the invitation. Please try again.",
-        };
-    }
+    return {
+      success: false,
+      error: "Failed to send invitation",
+      message: "Unable to send the invitation. Please try again.",
+    };
+  }
 }
